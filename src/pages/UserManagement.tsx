@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Box, Button, Paper, Table, TableBody,TableCell, TableContainer, 
   TableHead, TableRow, IconButton, Pagination, Dialog, DialogTitle, DialogContent, 
-  DialogActions, TextField, MenuItem, Typography,  Checkbox, FormControlLabel
+  DialogActions, TextField, MenuItem, Typography
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import Sidebar from "../components/Sidebar";
 import api from "../api/axios";
+import type { UserRole} from "../types/role.type";
 
 interface User {
   _id: string;
@@ -17,31 +18,17 @@ interface User {
   role?: string;
 }
 
-interface Permission {
-  [module: string]: {
-    GET: boolean;
-    POST: boolean;
-    PATCH: boolean;
-    DELETE: boolean;
-  };
-}
-
-interface Role {
-  _id: string;
-  role: string;
-  isSuperAdmin: boolean;
-  permission: Permission;
-}
-
 const UserManagement: React.FC = () => {
   const raw: any = localStorage.getItem("role");
-  const roleFromStorage = JSON.parse(raw) as Role;
-
+  const roleFromStorage = JSON.parse(raw) as UserRole;
+  const userPerm = (roleFromStorage?.permission?.user ?? {
+    GET: false, POST: false, PATCH: false, DELETE: false,
+  });
   const [users, setUsers] = useState<User[]>([]);
   const [page, setPage] = useState(1);
   const [rowsPerPage] = useState(10);
 
-  const [roles, setRoles] = useState<Role[]>([]);
+  const [roles, setRoles] = useState<UserRole[]>([]);
   const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
 
@@ -52,6 +39,12 @@ const UserManagement: React.FC = () => {
   const [formRoleId, setFormRoleId] = useState<string>("");
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const isSA = !!roleFromStorage?.isSuperAdmin;
+  const canCreate = isSA || !!userPerm.POST;
+  const canEdit   = isSA || !!userPerm.PATCH;
+  const canDelete = isSA || !!userPerm.DELETE;
+  const canActCol = canEdit || canDelete;
 
   const fetchUsers = async () => {
     try {
@@ -65,7 +58,7 @@ const UserManagement: React.FC = () => {
   const fetchRoles = async () => {
     try {
       const res = await api.get("/role");
-      const list: Role[] = res.data?.data || [];
+      const list: UserRole[] = res.data?.data || [];
       setRoles(list);
     } catch (err) {
       console.error(err);
@@ -76,6 +69,12 @@ const UserManagement: React.FC = () => {
     fetchUsers();
     fetchRoles();
   }, []);
+
+  const roleNameById = useMemo(() => {
+    const m = new Map<string, string>();
+    roles.forEach(r => m.set(r._id, r.role));
+    return m;
+  }, [roles]);
 
   const start = (page - 1) * rowsPerPage;
   const end = start + rowsPerPage;
@@ -169,10 +168,12 @@ const UserManagement: React.FC = () => {
         }}
         >
         <Typography variant="h4" mb={2}>การจัดการผู้ใช้</Typography>
-        
-        <Button variant="contained" color="primary" sx={{ mb: 2 }} onClick={() => handleOpenCreate()} > 
+
+        {canCreate && (
+          <Button variant="contained" color="primary" sx={{ mb: 2 }} onClick={() => handleOpenCreate()} > 
           <AddIcon sx={{ mr: 1 }} />สร้างผู้ใช้
         </Button>
+        )}
 
         <TableContainer component={Paper} sx={{ width: "100%", overflowX: "auto" }}>
           <Table sx={{ minWidth: 650 }}>
@@ -180,7 +181,8 @@ const UserManagement: React.FC = () => {
               <TableRow>
                 <TableCell>ชื่อ</TableCell>
                 <TableCell>ชื่อ</TableCell>
-                <TableCell sx={{ textAlign: 'center' }}>การกระทำ</TableCell>
+                <TableCell>บทบาท</TableCell>
+                {canActCol && <TableCell sx={{ textAlign: 'center' }}>การกระทำ</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -188,16 +190,22 @@ const UserManagement: React.FC = () => {
                 <TableRow key={user._id}>
                   <TableCell>{user.username}</TableCell>
                   <TableCell>{user.name}</TableCell>
-                  <TableCell sx={{ textAlign: 'center' }}>
-                    <IconButton color="primary" onClick={() => handleEditOpen(user._id)}>
-                      <EditIcon />
-                    </IconButton>
-                    {(roleFromStorage as any).role === "Super Admin" && (
-                      <IconButton color="error" onClick={() => handleDelete(user._id)}>
-                        <DeleteIcon />
-                      </IconButton>                    
-                    )}
-                  </TableCell>
+                  <TableCell>{roleNameById.get(user.role || "") ?? "-"}</TableCell>
+
+                  {canActCol && (
+                    <TableCell sx={{ textAlign: 'center' }}>
+                      {canEdit && (
+                        <IconButton color="primary" onClick={() => handleEditOpen(user._id)}>
+                          <EditIcon />
+                        </IconButton>
+                      )}
+                      {canDelete && (
+                        <IconButton color="error" onClick={() => handleDelete(user._id)}>
+                          <DeleteIcon />
+                        </IconButton>                    
+                      )}
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

@@ -25,12 +25,12 @@ const Login: React.FC = () => {
       localStorage.setItem("token", token);
       localStorage.setItem("role", JSON.stringify(role));
 
-      // if (role === "admin") {
-      //   navigate("/users");
-      // } else {
-      //   navigate("/users");
-      // }
-      navigate("/users");
+      if (role.role === "Super Admin") {
+        navigate("/players");
+      } else {
+        navigate("/users");
+      }
+      //navigate("/");
     } catch (err: any){
       setError(err.response?.data?.message || "Login failed");
     }

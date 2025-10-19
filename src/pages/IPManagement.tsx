@@ -8,6 +8,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Sidebar from "../components/Sidebar";
 import api from "../api/axios";
+import type { UserRole} from "../types/role.type";
 
 interface IP {
   _id: string;
@@ -16,7 +17,11 @@ interface IP {
 }
 
 const IPManagement: React.FC = () => {
-  //const role = localStorage.getItem("role") as "admin" | "user";
+  const raw: any = localStorage.getItem("role");
+  const roleFromStorage = JSON.parse(raw) as UserRole;
+  const userPerm = (roleFromStorage?.permission?.user ?? {
+    GET: false, POST: false, PATCH: false, DELETE: false,
+  });
 
   const [ips, setIps] = useState<IP[]>([]);
   const [page, setPage] = useState(1);
@@ -27,6 +32,12 @@ const IPManagement: React.FC = () => {
   const [formDescription, setFormDescription] = useState("");
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const isSA = !!roleFromStorage?.isSuperAdmin;
+  const canCreate = isSA || !!userPerm.POST;
+  const canEdit   = isSA || !!userPerm.PATCH;
+  const canDelete = isSA || !!userPerm.DELETE;
+  const canActCol = canEdit || canDelete;
 
   const fetchIPs = async () => {
     try {
@@ -60,62 +71,67 @@ const IPManagement: React.FC = () => {
       console.error(err);
     }
   };
-
+  
   // DELETE
   const handleDelete = async (id: string) => {
     if (!confirm("คุณแน่ใจว่าต้องการลบ IP นี้หรือไม่?")) return;
     try {
-      await api.delete("/whitelist", { data: { id } });
+      await api.delete(`/whitelist?id=${id}`);
       fetchIPs();
     } catch (err) {
       console.error(err);
     }
   };
 
-
   return (
     <Box sx={{ display: "flex" }}>
       <Sidebar open={sidebarOpen} setOpen={setSidebarOpen}/>
-       <Box
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          transition: "margin 0.3s, width 0.3s",
-          display: "flex", 
-          flexDirection: "column", 
-          alignItems: "flex-start", 
-        }}
-      >
-        <Typography variant="h4" mb={2}>IP ไวท์ลิสต์ การจัดการ</Typography>
+      <Box
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          transition: "margin 0.3s, width 0.3s",
+          display: "flex", 
+          flexDirection: "column",
+          alignItems: "flex-start", 
+        }}
+      >
+        <Typography variant="h4" mb={2}>IP ไวท์ลิสต์ การจัดการ</Typography>
 
-          <Button variant="contained" color="primary" sx={{ mb: 2 }} onClick={() => setOpenCreate(true)} > 
-             <AddIcon sx={{ mr: 1 }} />สร้าง ไวท์ลิสต์
-          </Button>
-
+        {canCreate && (
+          <Button variant="contained" color="primary" sx={{ mb: 2 }} onClick={() => setOpenCreate(true)} > 
+          <AddIcon sx={{ mr: 1 }} />สร้าง ไวท์ลิสต์
+        </Button>
+        )}
+        
         <TableContainer component={Paper} sx={{ width: "100%", overflowX: "auto" }}>
-          <Table sx={{ minWidth: 650 }}>
-            <TableHead>
-              <TableRow>
-                <TableCell>IP</TableCell>
-                <TableCell>คำอธิบาย</TableCell>
-                <TableCell sx={{ textAlign: 'center' }}>การกระทำ</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paginatedIps.map((ip) => (
-                <TableRow key={ip._id}>
-                  <TableCell>{ip.ip}</TableCell>
-                  <TableCell>{ip.description}</TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}>
-                      <IconButton color="error" onClick={() => handleDelete(ip._id)}>
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+          <Table sx={{ minWidth: 650 }}>
+            <TableHead>
+              <TableRow>
+                <TableCell>IP</TableCell>
+                <TableCell>คำอธิบาย</TableCell>
+                {canActCol && ( <TableCell sx={{ textAlign: 'center' }}>การกระทำ</TableCell> )}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedIps.map((ip) => (
+                <TableRow key={ip._id}>
+                  <TableCell>{ip.ip}</TableCell>
+                  <TableCell>{ip.description}</TableCell>
+                  {canActCol && (
+                    <TableCell sx={{ textAlign: 'center' }}>
+                      {canDelete && (
+                        <IconButton color="error" onClick={() => handleDelete(ip._id)}>
+                          <DeleteIcon />
+                        </IconButton>
+                      )}
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
         {ips.length / rowsPerPage > 1 && (
           <Pagination
@@ -128,33 +144,33 @@ const IPManagement: React.FC = () => {
 
         {/* CREATE MODAL */}
         <Dialog open={openCreate} onClose={() => setOpenCreate(false)}>
-          <DialogTitle>สร้าง IP ไวท์ลิสต์</DialogTitle>
-          <DialogContent>
-            <TextField
-              label="IP"
-              fullWidth
-              margin="normal"
-              value={formIp}
-              onChange={(e) => setFormIp(e.target.value)}
-            />
-            <TextField
-              label="คำอธิบาย"
-              fullWidth
-              margin="normal"
-              value={formDescription}
-              onChange={(e) => setFormDescription(e.target.value)}
-            />
+          <DialogTitle>สร้าง IP ไวท์ลิสต์</DialogTitle>
+          <DialogContent>
+            <TextField
+              label="IP"
+              fullWidth
+              margin="normal"
+              value={formIp}
+              onChange={(e) => setFormIp(e.target.value)}
+            />
+            <TextField
+              label="คำอธิบาย"
+              fullWidth
+              margin="normal"
+              value={formDescription}
+              onChange={(e) => setFormDescription(e.target.value)}
+            />
 
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => {
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => {
               setOpenCreate(false);
               setFormIp("");
               setFormDescription("");
             }}>ยกเลิก</Button>
-            <Button onClick={handleCreate} variant="contained" color="primary">สร้าง</Button>
-          </DialogActions>
-        </Dialog>
+            <Button onClick={handleCreate} variant="contained" color="primary">สร้าง</Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Box>
   );

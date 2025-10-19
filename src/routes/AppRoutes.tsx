@@ -4,6 +4,7 @@ import Login from "../pages/Login";
 import UserManagement from "../pages/UserManagement";
 import WebsiteManagement from "../pages/WebsiteManagement";
 import IPManagement from "../pages/IPManagement";
+import PlayerManagement from "../pages/PlayerManagement";
 import ProtectedRoute from "../components/ProtectedRoute";
 
 const AppRoutes: React.FC = () => {
@@ -11,11 +12,19 @@ const AppRoutes: React.FC = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route
+        {/* <Route
           path="/"
           element={
             <ProtectedRoute>
               <WebsiteManagement />
+            </ProtectedRoute>
+          }
+        /> */}
+        <Route
+          path="/players"
+          element={
+            <ProtectedRoute>
+              <PlayerManagement />
             </ProtectedRoute>
           }
         />

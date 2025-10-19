@@ -4,7 +4,7 @@ import {
   ListItemButton, ListItemText, IconButton, Button
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import LanguageIcon from '@mui/icons-material/Language';
+import PersonIcon from '@mui/icons-material/Person';
 import DnsIcon from '@mui/icons-material/Dns';
 import GroupIcon from '@mui/icons-material/Group';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -75,10 +75,16 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
             )}
           </Box>
           <List sx={{ flexGrow: 1 }}>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate("/")}>
+            {/* <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate("/users")}>
                 <LanguageIcon  sx={{ mr:2 }} />
-                <ListItemText primary="การจัดการเว็บไซต์" />
+                <ListItemText primary="การจัดการผู้ใช้" />
+              </ListItemButton>
+            </ListItem> */}
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate("/players")}>
+                <PersonIcon  sx={{ mr:2 }}/>
+                <ListItemText primary="การจัดการผู้เล่น" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>

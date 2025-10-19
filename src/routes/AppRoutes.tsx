@@ -5,6 +5,7 @@ import UserManagement from "../pages/UserManagement";
 import WebsiteManagement from "../pages/WebsiteManagement";
 import IPManagement from "../pages/IPManagement";
 import PlayerManagement from "../pages/PlayerManagement";
+import PlayerHistory from "../pages/PlayerHistory";
 import ProtectedRoute from "../components/ProtectedRoute";
 
 const AppRoutes: React.FC = () => {
@@ -25,6 +26,14 @@ const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute>
               <PlayerManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/playhistory"
+          element={
+            <ProtectedRoute>
+              <PlayerHistory />
             </ProtectedRoute>
           }
         />

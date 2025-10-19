@@ -19,7 +19,7 @@ interface IP {
 const IPManagement: React.FC = () => {
   const raw: any = localStorage.getItem("role");
   const roleFromStorage = JSON.parse(raw) as UserRole;
-  const userPerm = (roleFromStorage?.permission?.user ?? {
+  const userPerm = (roleFromStorage?.permission?.whitelist ?? {
     GET: false, POST: false, PATCH: false, DELETE: false,
   });
 

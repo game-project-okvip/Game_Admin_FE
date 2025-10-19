@@ -30,7 +30,7 @@ const Login: React.FC = () => {
       } else {
         navigate("/users");
       }
-      //navigate("/");
+      
     } catch (err: any){
       setError(err.response?.data?.message || "Login failed");
     }
@@ -54,7 +54,7 @@ const Login: React.FC = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3, mb: 2 }}>
         <Box component={"img"} src={logo} draggable={false} width={100} />
         <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-          ระบบจัดการเว็บไซต์
+          ระบบจัดการเกม
         </Typography>
       </Box>
       

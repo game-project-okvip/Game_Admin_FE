@@ -7,6 +7,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import PersonIcon from '@mui/icons-material/Person';
 import DnsIcon from '@mui/icons-material/Dns';
 import GroupIcon from '@mui/icons-material/Group';
+import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate, Link } from "react-router-dom";
 import logo from '../assets/logo.png';
@@ -85,6 +86,12 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
               <ListItemButton onClick={() => navigate("/players")}>
                 <PersonIcon  sx={{ mr:2 }}/>
                 <ListItemText primary="การจัดการผู้เล่น" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate("/playhistory")}>
+                <ManageSearchIcon  sx={{ mr:2 }}/>
+                <ListItemText primary="ประวัติการเล่น" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>

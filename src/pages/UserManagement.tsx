@@ -161,6 +161,9 @@ const UserManagement: React.FC = () => {
         sx={{
           flexGrow: 1,
           p: 3,
+          width: `calc(100% - ${sidebarOpen ? 240 : 0}px)`,
+          ml: sidebarOpen ? '-20%' : '-40%',
+          mr: sidebarOpen ? '-20%' : '-20%',
           transition: "margin 0.3s, width 0.3s",
           display: "flex", 
           flexDirection: "column", 

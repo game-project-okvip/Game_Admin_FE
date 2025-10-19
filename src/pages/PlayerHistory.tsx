@@ -246,7 +246,7 @@ const PlayerHistory: React.FC = () => {
 
         {/* Table */}
         {paginated.length === 0 ? (
-          <Typography sx={{ textAlign: "center", mt: 4 }}>ไม่มีข้อมูล</Typography>
+          <Typography sx={{ textAlign: "center", mt: 4 }}>ใช้ตัวกรองและค้นหา</Typography>
         ) : (
           <TableContainer component={Paper} sx={{ bgcolor: "#1e1e1e" }}>
             <Table>

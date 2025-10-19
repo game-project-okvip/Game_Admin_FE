@@ -11,6 +11,7 @@ import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate, Link } from "react-router-dom";
 import logo from '../assets/logo.png';
+import type { UserRole } from "../types/role.type";
 
 interface SidebarProps {
   open: boolean;
@@ -21,6 +22,43 @@ const drawerWidth = 240;
 
 const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
   const navigate = useNavigate();
+
+  const rawRole = localStorage.getItem("role");
+  const roleData = rawRole ? (JSON.parse(rawRole) as UserRole) : null;
+  const permission = roleData?.permission ?? {};
+
+  const isSA = !!roleData?.isSuperAdmin;
+
+  const pages = [
+    {
+      key: "player",
+      label: "การจัดการผู้เล่น",
+      icon: <PersonIcon sx={{ mr: 2 }} />,
+      path: "/players",
+    },
+    {
+      key: "playhistory",
+      label: "ประวัติการเล่น",
+      icon: <ManageSearchIcon sx={{ mr: 2 }} />,
+      path: "/playhistory",
+    },
+    {
+      key: "user",
+      label: "การจัดการผู้ใช้",
+      icon: <GroupIcon sx={{ mr: 2 }} />,
+      path: "/users",
+    },
+    {
+      key: "whitelist",
+      label: "IP การจัดการ",
+      icon: <DnsIcon sx={{ mr: 2 }} />,
+      path: "/ips",
+    },
+  ];
+
+  const visiblePages = pages.filter(
+    (page) => isSA || permission?.[page.key]?.GET
+  );
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -76,37 +114,16 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
             )}
           </Box>
           <List sx={{ flexGrow: 1 }}>
-            {/* <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate("/users")}>
-                <LanguageIcon  sx={{ mr:2 }} />
-                <ListItemText primary="การจัดการผู้ใช้" />
-              </ListItemButton>
-            </ListItem> */}
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate("/players")}>
-                <PersonIcon  sx={{ mr:2 }}/>
-                <ListItemText primary="การจัดการผู้เล่น" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate("/playhistory")}>
-                <ManageSearchIcon  sx={{ mr:2 }}/>
-                <ListItemText primary="ประวัติการเล่น" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate("/users")}>
-                <GroupIcon  sx={{ mr:2 }}/>
-                <ListItemText primary="การจัดการผู้ใช้" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate("/ips")}>
-                <DnsIcon sx={{ mr:2 }}/>
-                <ListItemText primary="IP การจัดการ" />
-              </ListItemButton>
-            </ListItem>
-          </List>
+            {visiblePages.map((page) => (
+              <ListItem disablePadding key={page.key}>
+                <ListItemButton onClick={() => navigate(page.path)}>
+                  {page.icon}
+                  <ListItemText primary={page.label} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+            </List>
+            
           <Box sx={{ p: 2 }}>
             <Button variant="outlined" color="secondary" fullWidth onClick={handleLogout}><LogoutIcon sx={{mr: 2}}/>ออกจากระบบ</Button>
           </Box>

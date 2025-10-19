@@ -5,6 +5,7 @@ import {
   DialogTitle, DialogContent, DialogActions, TextField, Typography
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Sidebar from "../components/Sidebar";
 import api from "../api/axios";
@@ -32,6 +33,8 @@ const IPManagement: React.FC = () => {
   const [formDescription, setFormDescription] = useState("");
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
 
   const isSA = !!roleFromStorage?.isSuperAdmin;
   const canCreate = isSA || !!userPerm.POST;
@@ -72,6 +75,31 @@ const IPManagement: React.FC = () => {
     }
   };
   
+  // Edit
+  const handleEditOpen = (ip: IP) => {
+    setEditId(ip._id);
+    setFormIp(ip.ip);
+    setFormDescription(ip.description);
+    setOpenEdit(true);
+  };
+
+  const handleEditSave = async () => {
+    if (!editId) return;
+    try {
+      await api.patch(`/whitelist?id=${editId}`, {
+        ip: formIp,
+        description: formDescription,
+      });
+      setOpenEdit(false);
+      setEditId(null);
+      setFormIp("");
+      setFormDescription("");
+      fetchIPs();
+    } catch (err) {
+      console.error("Error editing whitelist:", err);
+    }
+  };
+
   // DELETE
   const handleDelete = async (id: string) => {
     if (!confirm("คุณแน่ใจว่าต้องการลบ IP นี้หรือไม่?")) return;
@@ -120,6 +148,11 @@ const IPManagement: React.FC = () => {
                   <TableCell>{ip.description}</TableCell>
                   {canActCol && (
                     <TableCell sx={{ textAlign: 'center' }}>
+                      {canEdit && (
+                        <IconButton color="primary" onClick={() => handleEditOpen(ip)}>
+                          <EditIcon />
+                        </IconButton>
+                      )}
                       {canDelete && (
                         <IconButton color="error" onClick={() => handleDelete(ip._id)}>
                           <DeleteIcon />
@@ -169,6 +202,31 @@ const IPManagement: React.FC = () => {
               setFormDescription("");
             }}>ยกเลิก</Button>
             <Button onClick={handleCreate} variant="contained" color="primary">สร้าง</Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* EDIT MODAL */}
+        <Dialog open={openEdit} onClose={() => setOpenEdit(false)}>
+          <DialogTitle>แก้ไข IP ไวท์ลิสต์</DialogTitle>
+          <DialogContent>
+            <TextField
+              label="IP"
+              fullWidth
+              margin="normal"
+              value={formIp}
+              onChange={(e) => setFormIp(e.target.value)}
+            />
+            <TextField
+              label="คำอธิบาย"
+              fullWidth
+              margin="normal"
+              value={formDescription}
+              onChange={(e) => setFormDescription(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenEdit(false)}>ยกเลิก</Button>
+            <Button onClick={handleEditSave} variant="contained" color="primary">บันทึก</Button>
           </DialogActions>
         </Dialog>
       </Box>

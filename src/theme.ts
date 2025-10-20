@@ -8,7 +8,7 @@ const theme = createTheme({
       contrastText: "#000000", // black text on gold buttons
     },
     secondary: {
-      main: "#FFA500", // a slightly darker gold
+      main: "#4ade80", // a slightly darker gold
     },
     background: {
       default: "#000000", // black background

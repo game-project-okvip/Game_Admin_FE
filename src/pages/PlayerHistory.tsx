@@ -54,6 +54,8 @@ const PlayerHistory: React.FC = () => {
   const [page, setPage] = useState(1);
   const [rowsPerPage] = useState(5);
 
+  const [rowPages, setRowPages] = useState<Record<string, number>>({});
+
   const isSA = !!roleFromStorage?.isSuperAdmin;
   const canView = isSA || !!userPerm.GET;
 
@@ -152,7 +154,7 @@ const PlayerHistory: React.FC = () => {
           alignItems: "flex-start",
         }}
       >
-        <Typography variant="h4" sx={{ mb: 3, color: "#ffeb3b", fontWeight: "bold" }}>
+        <Typography variant="h4" mb={2}>
           รายการประวัติการเล่น
         </Typography>
 
@@ -217,13 +219,8 @@ const PlayerHistory: React.FC = () => {
           />
           <Button
             variant="contained"
-            sx={{
-              bgcolor: "#ffeb3b",
-              color: "#000",
-              fontWeight: "bold",
-              "&:hover": { bgcolor: "#fdd835" },
-              height: "56px",
-            }}
+            sx={{ height: "56px" }}
+            color="primary"
             onClick={handleSearch}
           >
             ค้นหา
@@ -231,12 +228,13 @@ const PlayerHistory: React.FC = () => {
           <Button
             variant="contained"
             sx={{
-              bgcolor: "#4ade80",
-              color: "#000",
-              fontWeight: "bold",
-              "&:hover": { bgcolor: "#22c55e" },
+              // bgcolor: "#4ade80",
+              // color: "#000",
+              // fontWeight: "bold",
+              // "&:hover": { bgcolor: "#22c55e" },
               height: "56px",
             }}
+            color="secondary"
             onClick={handleDownload}
           >
             ดาวน์โหลด Excel
@@ -254,7 +252,7 @@ const PlayerHistory: React.FC = () => {
                   <TableCell sx={{ color: "#ffeb3b" }} />
                   <TableCell sx={{ color: "#ffeb3b" }}><strong>ชื่อผู้เล่น</strong></TableCell>
                   <TableCell sx={{ color: "#ffeb3b" }} align="center"><strong>ยอดเงินคงเหลือ</strong></TableCell>
-                  <TableCell sx={{ color: "#ffeb3b" }} align="right"><strong>จำนวนเกม</strong></TableCell>
+                  <TableCell sx={{ color: "#ffeb3b" }} align="center"><strong>จำนวนเกม</strong></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -274,7 +272,7 @@ const PlayerHistory: React.FC = () => {
                       <TableCell align="center" sx={{ color: "#4ade80" }}>
                         {group.client.balance.toFixed(2)}
                       </TableCell>
-                      <TableCell align="right" sx={{ color: "#fff" }}>
+                      <TableCell align="center" sx={{ color: "#fff" }}>
                         {group.records.length}
                       </TableCell>
                     </TableRow>
@@ -296,34 +294,64 @@ const PlayerHistory: React.FC = () => {
                                 </TableRow>
                               </TableHead>
                               <TableBody>
-                                {group.records.map((h) => (
-                                  <TableRow key={h._id}>
-                                    <TableCell sx={{ color: "#fff", fontSize: "15px" }}>{h.game}</TableCell>
-                                    <TableCell
-                                      sx={{
-                                        color:
-                                          h.status === "Win"
-                                            ? "#4ade80"
-                                            : h.status === "Lose"
-                                            ? "#f87171"
-                                            : "#9ca3af",
-                                        fontSize: "15px"
-                                      }}
-                                    >
-                                      {h.status}
-                                    </TableCell>
-                                    <TableCell align="right" sx={{ color: "#fff", fontSize: "15px" }}>
-                                      {h.amount}
-                                    </TableCell>
-                                    <TableCell align="center" sx={{ color: "#fff", fontSize: "15px" }}>
-                                      {/* If want to display Thai year - change => th-TH */}
-                                      {new Date(h.createdAt).toLocaleString("en-GB", {
-                                        dateStyle: "short",
-                                        timeStyle: "short",
-                                      })}
-                                    </TableCell>
-                                  </TableRow>
-                                ))}
+                                {(() => {
+                                  // Collapse table pagination
+                                  const rowsPerPlayer = 10;
+                                  const currentPage = rowPages[group.client._id] || 1;
+                                  const startIdx = (currentPage - 1) * rowsPerPlayer;
+                                  const paginatedRecords = group.records.slice(startIdx, startIdx + rowsPerPlayer);
+
+                                  return (
+                                    <>
+                                      {paginatedRecords.map((h) => (
+                                        <TableRow key={h._id}>
+                                          <TableCell sx={{ color: "#fff", fontSize: "15px" }}>{h.game}</TableCell>
+                                          <TableCell
+                                            sx={{
+                                              color:
+                                                h.status === "Win"
+                                                  ? "#4ade80"
+                                                  : h.status === "Lose"
+                                                  ? "#f87171"
+                                                  : "#9ca3af",
+                                              fontSize: "15px",
+                                            }}
+                                          >
+                                            {h.status}
+                                          </TableCell>
+                                          <TableCell align="right" sx={{ color: "#fff", fontSize: "15px" }}>
+                                            {h.amount}
+                                          </TableCell>
+                                          <TableCell align="center" sx={{ color: "#fff", fontSize: "15px" }}>
+                                            {new Date(h.createdAt).toLocaleString("en-GB", {
+                                              dateStyle: "short",
+                                              timeStyle: "short",
+                                            })}
+                                          </TableCell>
+                                        </TableRow>
+                                      ))}
+
+                                      {group.records.length > rowsPerPlayer && (
+                                        <TableRow>
+                                          <TableCell colSpan={4} align="right">
+                                            <Pagination
+                                              size="small"
+                                              count={Math.ceil(group.records.length / rowsPerPlayer)}
+                                              page={currentPage}
+                                              onChange={(_, page) =>
+                                                setRowPages((prev) => ({ ...prev, [group.client._id]: page }))
+                                              }
+                                              sx={{
+                                                "& .MuiPaginationItem-root": { color: "#fff" },
+                                                mt: 1,
+                                              }}
+                                            />
+                                          </TableCell>
+                                        </TableRow>
+                                      )}
+                                    </>
+                                  );
+                                })()}
                               </TableBody>
                             </Table>
                           </Box>

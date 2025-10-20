@@ -1,7 +1,6 @@
 import axios from "axios";
 
 const api = axios.create({
-  //baseURL: "https://api-webmanagment.781243555.com", 
   baseURL: "http://128.10.102.8:3003", 
 });
 
@@ -12,5 +11,17 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;

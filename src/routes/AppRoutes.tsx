@@ -2,7 +2,6 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/Login";
 import UserManagement from "../pages/UserManagement";
-import WebsiteManagement from "../pages/WebsiteManagement";
 import IPManagement from "../pages/IPManagement";
 import PlayerManagement from "../pages/PlayerManagement";
 import PlayerHistory from "../pages/PlayerHistory";
@@ -12,15 +11,18 @@ const AppRoutes: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login />} />
-        {/* <Route
+        <Route
           path="/"
           element={
-            <ProtectedRoute>
-              <WebsiteManagement />
-            </ProtectedRoute>
+            localStorage.getItem("token") ? (
+              <Navigate to="/players" />
+            ) : (
+              <Navigate to="/login" />
+            )
           }
-        /> */}
+        />
+
+        <Route path="/login" element={<Login />} />
         <Route
           path="/players"
           element={
@@ -54,7 +56,7 @@ const AppRoutes: React.FC = () => {
           }
         />
 
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
   );

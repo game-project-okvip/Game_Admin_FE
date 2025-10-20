@@ -176,18 +176,18 @@ const PlayerManagement: React.FC = () => {
 
                 {/* History Table */}
                 <Typography variant="h6" gutterBottom>
-                  ประวัติการเล่นล่าสุด (10 Records)
+                  ประวัติการเล่นล่าสุด (10 รายการ)
                 </Typography>
 
                 <Typography variant="h6" gutterBottom sx={{ color: "#4ade80" }}>
-                  Total Win - {selectedPlayer.histories
+                  ชนะทั้งหมด - {selectedPlayer.histories
                   ?.filter((h: any) => h.status === "Win")
                   .reduce((sum: number, h: any) => sum + h.amount, 0)
                   .toFixed(2)}
                 </Typography>
 
                 <Typography variant="h6" gutterBottom sx={{ color: "#f87171" }}>
-                  Total Lose - {selectedPlayer.histories
+                  แพ้ทั้งหมด - {selectedPlayer.histories
                   ?.filter((h: any) => h.status === "Lose")
                   .reduce((sum: number, h: any) => sum + h.amount, 0)
                   .toFixed(2)}

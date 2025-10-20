@@ -124,7 +124,7 @@ const IPManagement: React.FC = () => {
           transition: "margin 0.3s, width 0.3s",
           display: "flex", 
           flexDirection: "column",
-          alignItems: "flex-start", 
+          alignItems: "flex-start",
         }}
       >
         <Typography variant="h4" mb={2}>IP ไวท์ลิสต์ การจัดการ</Typography>

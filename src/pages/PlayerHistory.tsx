@@ -86,12 +86,12 @@ const PlayerHistory: React.FC = () => {
     // Create worksheet and workbook
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Player History");
+    XLSX.utils.book_append_sheet(wb, ws, "Play History");
 
     // Export to file
     const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const today = new Date().toISOString().split("T")[0];
-    saveAs(new Blob([wbout], { type: "application/octet-stream" }), `Player_History_${today}.xlsx`);
+    saveAs(new Blob([wbout], { type: "application/octet-stream" }), `Play_History_${today}.xlsx`);
   };
 
   const handleSearch = async () => {
@@ -150,7 +150,6 @@ const PlayerHistory: React.FC = () => {
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-start",
-          paddingTop: "12px !important",
         }}
       >
         <Typography variant="h4" sx={{ mb: 3, color: "#ffeb3b", fontWeight: "bold" }}>

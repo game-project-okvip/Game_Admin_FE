@@ -1,23 +1,33 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-  role?: "admin" | "user";
-}
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isValid, setIsValid] = useState<boolean | null>(null);
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, role }) => {
-  const token = localStorage.getItem("token");
-  const userRole = localStorage.getItem("role");
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setIsValid(false);
+      return;
+    }
 
-  if (!token) {
-    return <Navigate to="/login" />;
-  }
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const isExpired = payload.exp * 1000 < Date.now();
+      if (isExpired) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        setIsValid(false);
+      } else {
+        setIsValid(true);
+      }
+    } catch (err) {
+      setIsValid(false);
+    }
+  }, []);
 
-  if (role && userRole !== role) {
-    return <Navigate to="/login" />; 
-  }
-
+  if (isValid === null) return null;
+  if (!isValid) return <Navigate to="/login" />;
   return <>{children}</>;
 };
 

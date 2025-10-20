@@ -75,7 +75,7 @@ const PlayerTransction: React.FC = () => {
         "Balance": group.client.balance,
         "Type": rec.type,
         "Amount": rec.amount,
-        "DateTime": new Date(rec.createdAt).toLocaleString("th-TH", {
+        "DateTime": new Date(rec.createdAt).toLocaleString("en-GB", {
           dateStyle: "short",
           timeStyle: "short",
         }),
@@ -170,14 +170,14 @@ const PlayerTransction: React.FC = () => {
             label="ชื่อ"
             value={filters.name}
             onChange={(e) => handleFilterChange("name", e.target.value)}
-            sx={{ flex: 1, minWidth: 150, bgcolor: "#222", input: { color: "#fff" }, label: { color: "#aaa" } }}
+            sx={{ flex: 1, minWidth: 200, bgcolor: "#222", input: { color: "#fff" }, label: { color: "#aaa" } }}
           />
           <TextField
             select
             label="พิมพ์"
             value={filters.type}
             onChange={(e) => handleFilterChange("type", e.target.value)}
-            sx={{ flex: 1, minWidth: 150, bgcolor: "#222", label: { color: "#aaa" } }}
+            sx={{ flex: 1, minWidth: 200, bgcolor: "#222", label: { color: "#aaa" } }}
           >
             <MenuItem value="">All</MenuItem>
             <MenuItem value="Deposit">Deposit</MenuItem>
@@ -193,7 +193,7 @@ const PlayerTransction: React.FC = () => {
             }}
             value={filters.start}
             onChange={(e) => handleFilterChange("start", e.target.value)}
-            sx={{ flex: 1, minWidth: 150, bgcolor: "#222", label: { color: "#aaa" } }}
+            sx={{ flex: 1, minWidth: 200, bgcolor: "#222", label: { color: "#aaa" } }}
           />
           <TextField
             label="วันที่สิ้นสุด"
@@ -205,11 +205,11 @@ const PlayerTransction: React.FC = () => {
             }}
             value={filters.end}
             onChange={(e) => handleFilterChange("end", e.target.value)}
-            sx={{ flex: 1, minWidth: 150, bgcolor: "#222", label: { color: "#aaa" } }}
+            sx={{ flex: 1, minWidth: 200, bgcolor: "#222", label: { color: "#aaa" } }}
           />
           <Button
             variant="contained"
-            sx={{ height: "56px" }}
+            sx={{ height: "56px", minWidth: 150 }}
             color="primary"
             onClick={handleSearch}
           >
@@ -217,7 +217,7 @@ const PlayerTransction: React.FC = () => {
           </Button>
           <Button
             variant="contained"
-            sx={{ height: "56px" }}
+            sx={{ height: "56px", minWidth: 150 }}
             color="secondary"
             onClick={handleDownload}
           >
@@ -266,15 +266,15 @@ const PlayerTransction: React.FC = () => {
                         <Collapse in={openRows[group.client._id]} timeout="auto" unmountOnExit>
                           <Box sx={{ m: 2 }}>
                             <Typography variant="subtitle1" gutterBottom sx={{ color: "#ffeb3b" }}>
-                              <strong>Total Deposit - </strong>
+                              <strong>ยอดฝากทั้งหมด - </strong>
                               <span style={{ color: "#4ade80" }}> {group.records
                               ?.filter((h: any) => h.type === "Deposit")
                               .reduce((sum: number, h: any) => sum + h.amount, 0)
                               .toFixed(2)}</span> 
                             </Typography>
 
-                            <Typography variant="subtitle1" gutterBottom sx={{ color: "#ffeb3b" }}>
-                              <strong>Total Withdraw - </strong>
+                            <Typography variant="subtitle1" gutterBottom sx={{ color: "#ffeb3b", marginBottom: "15px" }}>
+                              <strong>ยอดถอนทั้งหมด - </strong>
                               <span style={{ color: "#f87171" }}> {group.records
                               ?.filter((h: any) => h.type === "Withdraw")
                               .reduce((sum: number, h: any) => sum + h.amount, 0)
@@ -309,7 +309,7 @@ const PlayerTransction: React.FC = () => {
                                                   : h.type === "Withdraw"
                                                   ? "#f87171"
                                                   : "#9ca3af",
-                                              fontSize: "15px",
+                                              fontSize: "16px",
                                             }}
                                           >
                                             {h.type}
@@ -320,11 +320,11 @@ const PlayerTransction: React.FC = () => {
                                                 h.type === "Deposit"
                                                 ? "#4ade80"
                                                 : "#f87171",
-                                              fontSize: "15px",
+                                              fontSize: "16px",
                                             }}>
                                             {h.amount}
                                           </TableCell>
-                                          <TableCell align="center" sx={{ color: "#fff", fontSize: "15px" }}>
+                                          <TableCell align="center" sx={{ color: "#fff", fontSize: "16px" }}>
                                             {new Date(h.createdAt).toLocaleString("en-GB", {
                                               dateStyle: "short",
                                               timeStyle: "short",

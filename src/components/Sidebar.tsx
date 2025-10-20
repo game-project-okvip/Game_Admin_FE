@@ -8,7 +8,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import DnsIcon from '@mui/icons-material/Dns';
 import GroupIcon from '@mui/icons-material/Group';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
-import PaidIcon from '@mui/icons-material/Paid';
+import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate, Link } from "react-router-dom";
 import logo from '../assets/logo.png';
@@ -46,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
     {
       key: "playertransction",
       label: "การทำธุรกรรมของผู้เล่น",
-      icon: <PaidIcon sx={{ mr: 2 }} />,
+      icon: <ReceiptLongOutlinedIcon sx={{ mr: 2 }} />,
       path: "/playertransction",
     },
     {

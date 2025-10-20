@@ -78,7 +78,7 @@ const PlayerHistory: React.FC = () => {
         "Game": rec.game,
         "Status": rec.status,
         "Amount": rec.amount,
-        "DateTime": new Date(rec.createdAt).toLocaleString("th-TH", {
+        "DateTime": new Date(rec.createdAt).toLocaleString("en-GB", {
           dateStyle: "short",
           timeStyle: "short",
         }),
@@ -203,7 +203,7 @@ const PlayerHistory: React.FC = () => {
             }}
             value={filters.start}
             onChange={(e) => handleFilterChange("start", e.target.value)}
-            sx={{ flex: 1, minWidth: 150, bgcolor: "#222", label: { color: "#aaa" } }}
+            sx={{ flex: 1, minWidth: 200, bgcolor: "#222", label: { color: "#aaa" } }}
           />
           <TextField
             label="วันที่สิ้นสุด"
@@ -215,11 +215,11 @@ const PlayerHistory: React.FC = () => {
             }}
             value={filters.end}
             onChange={(e) => handleFilterChange("end", e.target.value)}
-            sx={{ flex: 1, minWidth: 150, bgcolor: "#222", label: { color: "#aaa" } }}
+            sx={{ flex: 1, minWidth: 200, bgcolor: "#222", label: { color: "#aaa" } }}
           />
           <Button
             variant="contained"
-            sx={{ height: "56px" }}
+            sx={{ height: "56px", minWidth: 150 }}
             color="primary"
             onClick={handleSearch}
           >

@@ -21,9 +21,8 @@ interface Client {
 interface HistoryItem {
   _id: string;
   clientId: Client;
-  game: string;
-  status: string;
   amount: number;
+  type: string;
   createdAt: string;
 }
 
@@ -32,7 +31,7 @@ interface GroupedHistory {
   records: HistoryItem[];
 }
 
-const PlayerHistory: React.FC = () => {
+const PlayerTransction: React.FC = () => {
   const raw: any = localStorage.getItem("role");
   const roleFromStorage = JSON.parse(raw) as UserRole;
   const userPerm = (roleFromStorage?.permission?.playhistory ?? {
@@ -42,13 +41,12 @@ const PlayerHistory: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [filters, setFilters] = useState({
     name: "",
-    game: "",
-    status: "",
+    type: "",
     start: "",
     end: new Date().toISOString().split("T")[0],
   });
 
-  const [histories, setHistories] = useState<GroupedHistory[]>([]);
+  const [transctions, setTransctions] = useState<GroupedHistory[]>([]);
   const [openRows, setOpenRows] = useState<Record<string, boolean>>({});
 
   const [page, setPage] = useState(1);
@@ -65,18 +63,17 @@ const PlayerHistory: React.FC = () => {
 
   const handleDownload = () => {
     if (!canView) return alert("คุณไม่มีสิทธิ์ในการดาวน์โหลด");
-    if (histories.length === 0) {
+    if (transctions.length === 0) {
       alert("ไม่มีข้อมูลสำหรับดาวน์โหลด");
       return;
     }
 
     // Flatten grouped data into one list
-    const exportData = histories.flatMap((group) =>
+    const exportData = transctions.flatMap((group) =>
       group.records.map((rec) => ({
         "Player Name": group.client.username,
         "Balance": group.client.balance,
-        "Game": rec.game,
-        "Status": rec.status,
+        "Type": rec.type,
         "Amount": rec.amount,
         "DateTime": new Date(rec.createdAt).toLocaleString("th-TH", {
           dateStyle: "short",
@@ -88,12 +85,12 @@ const PlayerHistory: React.FC = () => {
     // Create worksheet and workbook
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Play History");
+    XLSX.utils.book_append_sheet(wb, ws, "Player Transction");
 
     // Export to file
     const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const today = new Date().toISOString().split("T")[0];
-    saveAs(new Blob([wbout], { type: "application/octet-stream" }), `Play_History_${today}.xlsx`);
+    saveAs(new Blob([wbout], { type: "application/octet-stream" }), `Player_Transction_${today}.xlsx`);
   };
 
   const handleSearch = async () => {
@@ -104,7 +101,7 @@ const PlayerHistory: React.FC = () => {
         if (val) params.append(key, val);
       });
 
-      const res = await api.get(`/playhistory?${params.toString()}`);
+      const res = await api.get(`/playertransction?${params.toString()}`);
       const items: HistoryItem[] = res.data?.data?.items || [];
 
       const grouped: Record<string, HistoryItem[]> = {};
@@ -122,9 +119,9 @@ const PlayerHistory: React.FC = () => {
         records,
       }));
 
-      setHistories(formatted);
+      setTransctions(formatted);
     } catch (err) {
-      console.error("Failed to fetch history:", err);
+      console.error("Failed to fetch transction:", err);
     }
   };
 
@@ -134,7 +131,7 @@ const PlayerHistory: React.FC = () => {
 
   const start = (page - 1) * rowsPerPage;
   const end = start + rowsPerPage;
-  const paginated = histories.slice(start, end);
+  const paginated = transctions.slice(start, end);
 
   return (
    <Box sx={{ display: "flex", bgcolor: "#000", color: "#fff", minHeight: "100vh" }}>
@@ -176,22 +173,15 @@ const PlayerHistory: React.FC = () => {
             sx={{ flex: 1, minWidth: 150, bgcolor: "#222", input: { color: "#fff" }, label: { color: "#aaa" } }}
           />
           <TextField
-            label="เกม"
-            value={filters.game}
-            onChange={(e) => handleFilterChange("game", e.target.value)}
-            sx={{ flex: 1, minWidth: 150, bgcolor: "#222", input: { color: "#fff" }, label: { color: "#aaa" } }}
-          />
-          <TextField
             select
-            label="สถานะ"
-            value={filters.status}
-            onChange={(e) => handleFilterChange("status", e.target.value)}
+            label="พิมพ์"
+            value={filters.type}
+            onChange={(e) => handleFilterChange("type", e.target.value)}
             sx={{ flex: 1, minWidth: 150, bgcolor: "#222", label: { color: "#aaa" } }}
           >
             <MenuItem value="">All</MenuItem>
-            <MenuItem value="Win">Win</MenuItem>
-            <MenuItem value="Lose">Lose</MenuItem>
-            <MenuItem value="Draw">Draw</MenuItem>
+            <MenuItem value="Deposit">Deposit</MenuItem>
+            <MenuItem value="Withdraw">Withdraw</MenuItem>
           </TextField>
           <TextField
             label="วันที่เริ่มต้น"
@@ -276,14 +266,26 @@ const PlayerHistory: React.FC = () => {
                         <Collapse in={openRows[group.client._id]} timeout="auto" unmountOnExit>
                           <Box sx={{ m: 2 }}>
                             <Typography variant="subtitle1" gutterBottom sx={{ color: "#ffeb3b" }}>
-                              ประวัติ
+                              <strong>Total Deposit - </strong>
+                              <span style={{ color: "#4ade80" }}> {group.records
+                              ?.filter((h: any) => h.type === "Deposit")
+                              .reduce((sum: number, h: any) => sum + h.amount, 0)
+                              .toFixed(2)}</span> 
                             </Typography>
+
+                            <Typography variant="subtitle1" gutterBottom sx={{ color: "#ffeb3b" }}>
+                              <strong>Total Withdraw - </strong>
+                              <span style={{ color: "#f87171" }}> {group.records
+                              ?.filter((h: any) => h.type === "Withdraw")
+                              .reduce((sum: number, h: any) => sum + h.amount, 0)
+                              .toFixed(2)}</span> 
+                            </Typography>
+
                             <Table size="small">
                               <TableHead>
                                 <TableRow>
-                                  <TableCell sx={{ color: "#ffeb3b" }}>เกม</TableCell>
-                                  <TableCell sx={{ color: "#ffeb3b" }}>สถานะ</TableCell>
-                                  <TableCell sx={{ color: "#ffeb3b" }} align="right">จำนวนเงิน</TableCell>
+                                  <TableCell sx={{ color: "#ffeb3b" }}>พิมพ์</TableCell>
+                                  <TableCell sx={{ color: "#ffeb3b" }} align="center">จำนวนเงิน</TableCell>
                                   <TableCell sx={{ color: "#ffeb3b" }} align="center">วันและเวลา</TableCell>
                                 </TableRow>
                               </TableHead>
@@ -299,21 +301,27 @@ const PlayerHistory: React.FC = () => {
                                     <>
                                       {paginatedRecords.map((h) => (
                                         <TableRow key={h._id}>
-                                          <TableCell sx={{ color: "#fff", fontSize: "15px" }}>{h.game}</TableCell>
                                           <TableCell
                                             sx={{
                                               color:
-                                                h.status === "Win"
+                                                h.type === "Deposit"
                                                   ? "#4ade80"
-                                                  : h.status === "Lose"
+                                                  : h.type === "Withdraw"
                                                   ? "#f87171"
                                                   : "#9ca3af",
                                               fontSize: "15px",
                                             }}
                                           >
-                                            {h.status}
+                                            {h.type}
                                           </TableCell>
-                                          <TableCell align="right" sx={{ color: "#fff", fontSize: "15px" }}>
+                                          <TableCell align="center" 
+                                            sx={{ 
+                                              color: 
+                                                h.type === "Deposit"
+                                                ? "#4ade80"
+                                                : "#f87171",
+                                              fontSize: "15px",
+                                            }}>
                                             {h.amount}
                                           </TableCell>
                                           <TableCell align="center" sx={{ color: "#fff", fontSize: "15px" }}>
@@ -358,9 +366,9 @@ const PlayerHistory: React.FC = () => {
             </Table>
           </TableContainer>
         )}
-        {histories.length / rowsPerPage > 1 && (
+        {transctions.length / rowsPerPage > 1 && (
             <Pagination
-              count={Math.max(1, Math.ceil(histories.length / rowsPerPage))}
+              count={Math.max(1, Math.ceil(transctions.length / rowsPerPage))}
               page={page}
               onChange={(_, value) => setPage(value)}
               sx={{
@@ -375,4 +383,4 @@ const PlayerHistory: React.FC = () => {
   );
 };
 
-export default PlayerHistory;
+export default PlayerTransction;
